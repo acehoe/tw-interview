@@ -18,23 +18,27 @@ fi;
 
 cd $WORKING_PATH
 
+dist_path=~/tw-interview/WebApp/dist/
+static_path=~/tw-interview/static-test/
+simpleweb_path=~/tw-interview/simpleweb/
+
+
 case "$1" in
   simpleweb)
       docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
       ;;
   setup)
       echo "downloading web service and java environment"
-      cp -p ../webapps.pem ~/.ssh/
+      
       docker pull tomcat:jdk8-corretto
+      docker pull weiwei100/ansible
+      cd ../
+      git clone https://github.com/acehoe/static-test.git
+      git clone https://github.com/acehoe/simpleweb.git
 
-      docker run -it --rm -p 8082:8080 -v $2:/usr/local/tomcat/webapps/ -v $3:/usr/local/tomcat/webapps/static -v $4:/usr/local/tomcat/source tomcat:jdk8-corretto
+      docker run -it --rm -p 8082:8080 -v $dist_path:/usr/local/tomcat/webapps/ -v $static_path:/usr/local/tomcat/webapps/static -v $simpleweb_path:/usr/local/tomcat/source tomcat:jdk8-corretto
       echo "setting up done..."
 
-      if [[ $# -ge 4 ]]; then
-        ansible-playbook -i config/$2.conf tmp.yml --extra-vars "target_hosts=$3" -e "git_branch=$4"
-        exit
-      fi
-        ansible-playbook -i config/$2.conf tmp.yml --extra-vars "target_hosts=$3"
       ;;
 
   build)
