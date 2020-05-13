@@ -1,4 +1,4 @@
-# tw-interview
+# tw-interview demo
 This demo project is to demonstrate how to streamline development and CI/CD with scripts. It consists of the following components:
   - static-test: this project holds all the css/js/images for the main site
   - simpleweb: this project provides a webpage that references resouces from above project
