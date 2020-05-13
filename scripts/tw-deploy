@@ -47,9 +47,9 @@ case "$1" in
       ;;
 
   simpleweb)
-          docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
+          docker run -ti --rm weiwei100/ansible:v1 bash tw-interview/deploy $1 $2 $3
           ;;
   static-test)
-        docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
+        docker run -ti --rm weiwei100/ansible:v1 bash tw-interview/deploy $1 $2 $3
       ;;
 esac
