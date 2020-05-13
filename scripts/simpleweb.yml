@@ -61,14 +61,16 @@
     - name: wait 3 sec for port to be ready
       wait_for: port={{port}} delay=3
       ignore_errors: True
+
     - name: check if service available
       action: uri url={{verify_url}} return_content=yes follow_redirects=all
       register: webpage
       ignore_errors: True
+
     - name: roll back to last current
       action: file dest={{dest_path}}/current src={{last_current.stdout}} state=link
-      when: webpage.content.find('{{check_string}}') == -1
-#      when: "'index' not in webpage.content"
+      when: check_string|string not in webpage.content
+
     - fail: msg='Service is not available!'
-      when: webpage.content.find('{{check_string}}') == -1
- #     when: "'index' not in webpage.content"
+      when: check_string|string not in webpage.content
+ 

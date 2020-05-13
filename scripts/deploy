@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -lt 2 ]; then
-    echo "please give at least 2 parameters: project and target_hosts. eg. deploy static staging(or prd)"
+    echo "please give at least 2 parameters: project and target_hosts. eg. deploy static staging(test, or prd)"
     exit 1
 fi
 

@@ -9,7 +9,7 @@ port=8080
 appname=static
 check_string=green
 version=stable
-verify_url=http://localhost:8080/static/css/style.css
+verify_url=http://13.231.229.207:8080/static/css/style.css
 
 [test]
 10.210.0.102  host_url=t.i.cn.tw.com
