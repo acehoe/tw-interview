@@ -44,8 +44,8 @@ case "$1" in
   build)
       cid=`docker ps|grep "tomcat:jdk8-corretto" |awk '{print $1}'`
       echo "compliling and packaging"
-      docker exec 3 javac source/web/Simple.java
-      docker exec 3 jar cvf webapps/WebApp.war -C source/web .
+      docker exec $cid javac source/web/Simple.java
+      docker exec $cid jar cvf webapps/WebApp.war -C source/web .
       echo "done build, you are ready to check your site"
       ;;
   static-test)
