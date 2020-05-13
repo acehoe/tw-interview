@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -o pipefail
 if [ $# -lt 2 ]; then
     echo "please give at least 2 parameters: project and target_hosts. eg. deploy static staging(test, or prd) feature/newfeature"
     exit 1
@@ -24,9 +24,6 @@ simpleweb_path=~/tw-interview/simpleweb/
 
 
 case "$1" in
-  simpleweb)
-      docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
-      ;;
   setup)
       echo "downloading web service and java environment"
 
@@ -48,6 +45,10 @@ case "$1" in
       docker exec $cid jar cvf webapps/WebApp.war -C source/web .
       echo "done build, you are ready to check your site"
       ;;
+
+  simpleweb)
+          docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
+          ;;
   static-test)
         docker run -ti --rm ansible:v1 bash tw-interview/deploy $1 $2 $3
       ;;
