@@ -29,9 +29,9 @@ case "$1" in
       ;;
   setup)
       echo "downloading web service and java environment"
-      
+
       docker pull tomcat:jdk8-corretto
-      docker pull weiwei100/ansible
+      docker pull weiwei100/ansible:v1
       cd ../
       git clone https://github.com/acehoe/static-test.git
       git clone https://github.com/acehoe/simpleweb.git
