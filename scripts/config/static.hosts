@@ -1,0 +1,37 @@
+[all:vars]
+code_server=10.210.0.104
+src_dir=/home/git/source
+home_path=/home/webapps
+with_db=false
+compiler_server=10.210.0.104
+gitrepo=static-test
+port=8080
+appname=static
+check_string=green
+version=stable
+verify_url=http://localhost:8080/static/css/style.css
+
+[test]
+10.210.0.102  host_url=t.i.cn.tw.com
+[test:vars]
+dest_path=/home/webapps
+env=test
+
+[staging]
+13.231.229.207 	host_url=s.i.cn.tw.com
+
+[staging:vars]
+dest_path=/home/webapps/static
+env=stg
+version=staging
+
+[prd]
+10.210.0.10   host_url=p.10.i.cn.tw.com
+10.210.0.11   host_url=p.11.i.cn.tw.com
+
+[prd:vars]
+dest_path=/opt/nyt/nytcn-static
+conf_path=prd.ec2
+appname=nytcn-static
+version=production
+env=prd

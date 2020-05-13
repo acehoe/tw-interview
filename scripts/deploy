@@ -1,0 +1,73 @@
+#!/bin/bash
+
+if [ $# -lt 2 ]; then
+    echo "please give at least 2 parameters: project and target_hosts. eg. deploy static staging(or prd)"
+    exit 1
+fi
+
+git_branch="HEAD"
+if [[ $# -ge 3 ]]; then
+  git_branch=$3
+fi
+
+if [ -L $0 ] ; then
+    WORKING_PATH=$(cd `dirname $(readlink -f $0)`; pwd);
+else
+    WORKING_PATH=$(cd `dirname ${0}`; pwd);
+fi;
+
+cd $WORKING_PATH
+case "$1" in
+  simpleweb)
+      if [[ $# -ge 3 ]]; then
+        ansible-playbook -i config/webapp.hosts simpleweb.yml --extra-vars "target_hosts=$2" -e "git_branch=$3"
+        exit
+      fi
+        ansible-playbook -i config/webapp.hosts simpleweb.yml --extra-vars "target_hosts=$2"
+      ;;
+  setup)
+      echo "downloading web service and java environment"
+      cp -p ../webapps.pem ~/.ssh/
+      docker pull tomcat:jdk8-corretto
+
+      docker run -it --rm -p 8082:8080 -v $2:/usr/local/tomcat/webapps/ -v $3:/usr/local/tomcat/webapps/static -v $4:/usr/local/tomcat/source tomcat:jdk8-corretto
+      echo "setting up done..."
+
+      if [[ $# -ge 4 ]]; then
+        ansible-playbook -i config/$2.conf tmp.yml --extra-vars "target_hosts=$3" -e "git_branch=$4"
+        exit
+      fi
+        ansible-playbook -i config/$2.conf tmp.yml --extra-vars "target_hosts=$3"
+      ;;
+
+  build)
+      cid=`docker ps|grep "tomcat:jdk8-corretto" |awk '{print $1}'`
+      echo "compliling and packaging"
+      docker exec 3 javac source/web/Simple.java
+      docker exec 3 jar cvf webapps/WebApp.war -C source/web .
+      echo "done build, you are ready to check your site"
+      ;;
+
+  athena)
+      if [[ $# -ge 3 ]]; then
+        ansible-playbook -i config/athena.hosts php_deployment.yml --extra-vars "target_hosts=$2" -e "git_branch=$3"
+        cd ../docker/scripts/;
+        bash deploy athenahk staging
+        exit
+      fi
+        ansible-playbook -i config/athena.hosts php_deployment.yml --extra-vars "target_hosts=$2"
+        cd ../docker/scripts/;
+        bash deploy athenahk staging
+        exit
+        #if [ $2 != "staging" ]; then
+        #  ansible-playbook -i config/athena.hosts php_deployment.yml --extra-vars "target_hosts=prd_ec2"
+        #fi
+      ;;
+  static-test)
+      if [[ $# -ge 3 ]]; then
+        ansible-playbook -i config/static.hosts static.yml --extra-vars "target_hosts=$2"  -e "git_branch=$3"
+        exit
+      fi
+        ansible-playbook -i config/static.hosts static.yml --extra-vars "target_hosts=$2"
+      ;;
+esac

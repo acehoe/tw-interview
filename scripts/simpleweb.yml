@@ -1,0 +1,74 @@
+---
+- hosts: "{{ target_hosts }}"
+  user: webapps
+  max_fail_percentage: 1
+  serial: 1
+  vars:
+    git_version: master
+
+  tasks:
+
+    # - name: make sure httplib2
+    #   pip: name=httplib2 state=present
+    - name: create project directory
+      action: file path={{dest_path}}/source state=directory
+
+    - name: pulling code to dest path
+      #git: repo=git@git.cntim.es:/home/git/source/{{gitrepo}}.git dest={{dest_path}}/source/ version={{ git_version }}
+      git: repo=https://github.com/acehoe/{{gitrepo}}.git dest={{dest_path}}/source/ version={{ git_version }}
+
+    - name: fetch the commit id
+      action: shell git log -1 --pretty=format:"%h" chdir={{dest_path}}/source/
+      register: deploy_tag
+
+    - name: create deploy directory
+      action: file path={{dest_path}}/releases/{{deploy_tag.stdout}} state=directory
+
+    - name: sync code to release folder
+      command: rsync -r {{dest_path}}/source/ {{dest_path}}/releases/{{deploy_tag.stdout}}
+
+    # - name: compile java code
+    #   command: javac -classpath
+    - name: package project
+      shell: jar -cvf WebApp.war * chdir={{dest_path}}/releases/{{deploy_tag.stdout}}/web
+
+    - name: move war file to project root
+      command: mv {{dest_path}}/releases/{{deploy_tag.stdout}}/web/WebApp.war {{dest_path}}/releases/{{deploy_tag.stdout}}/
+    - name: give tomcat permisson to read
+      file: dest={{dest_path}} owner=webapps group=tomcat recurse=yes
+    - name: cleanup
+      file: path={{dest_path}}/releases/{{deploy_tag.stdout}}/{{item}} state=absent
+      with_items:
+        - .git
+        - .gitignore
+        - build
+        - src
+        - build.xml
+        - web
+
+    - name: save last current
+      shell: ls -g {{dest_path}}/current|awk '{ print $10 }'
+      register: last_current
+      ignore_errors: True
+
+    - name: symlink to current
+      action: file src={{dest_path}}/releases/{{deploy_tag.stdout}} dest={{dest_path}}/current state=link
+
+    - name: deploy to tomcat
+      # command: ln -snf "`readlink {{dest_path}}/current`" /usr/share/tomcat/webapps/static
+      action: file src={{dest_path}}/releases/{{deploy_tag.stdout}}/WebApp.war dest=/usr/share/tomcat/webapps/WebApp.war state=link
+
+    - name: wait 3 sec for port to be ready
+      wait_for: port={{port}} delay=3
+      ignore_errors: True
+    - name: check if service available
+      action: uri url={{verify_url}} return_content=yes follow_redirects=all
+      register: webpage
+      ignore_errors: True
+    - name: roll back to last current
+      action: file dest={{dest_path}}/current src={{last_current.stdout}} state=link
+      when: webpage.content.find('{{check_string}}') == -1
+#      when: "'index' not in webpage.content"
+    - fail: msg='Service is not available!'
+      when: webpage.content.find('{{check_string}}') == -1
+ #     when: "'index' not in webpage.content"
