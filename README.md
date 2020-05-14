@@ -24,7 +24,7 @@ This demo project is to demonstrate how to streamline development and CI/CD with
   
   
 # HA, Monitor, logging:
-  As to last part of the questions about HA, monitor, logging, it depends on how the software systems are assesbled. My thoughts are
+  As to last part of the questions about HA, monitor, logging, it depends on how the software systems are assebled. My thoughts are
   1. traditional way: websites are hosted on barebone metal server, for HA, there are HAProxy, heatbeat, CDN services; for monitor, there are zabbix, nagios and other commercial tools. for logging, there are fluentd, elastic search, or maybe ELK.
-  2. Cloud: For HA, there are load balancers, for example ALB/ELB/cloudfront from AWS; Cloud watch for monitor; centralized logging for log aggregation,analyze and display.
+  2. Cloud: For HA, there are load balancers, for example ALB/ELB/cloudfront from AWS; Cloud watch for monitor; centralized logging for log aggregation, analyze and display.
   3. kuberntes: k8s provides internal loadbalancing, with the use of external LB services; promethues, container advisor for monitoring; fluentd and ELK stack for logging.
